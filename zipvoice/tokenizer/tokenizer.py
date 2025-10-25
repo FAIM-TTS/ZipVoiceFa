@@ -21,12 +21,12 @@ import re
 from abc import ABC, abstractmethod
 from functools import reduce
 from typing import Dict, List, Optional
-
+import sys
 import jieba
 from lhotse import CutSet
 from pypinyin import Style, lazy_pinyin
 from pypinyin.contrib.tone_convert import to_finals_tone3, to_initials
-
+import os
 from zipvoice.tokenizer.normalizer import ChineseTextNormalizer, EnglishTextNormalizer
 
 try:
@@ -123,6 +123,11 @@ class SimpleTokenizer(Tokenizer):
 
         return token_ids_list
 
+_PROSODY_DEL = {
+    ord("ˈ"): None,
+    ord("ˌ"): None,
+    ord("ː"): None,
+}
 
 class EspeakTokenizer(Tokenizer):
     """A simple tokenizer with Espeak g2p function."""
@@ -158,7 +163,11 @@ class EspeakTokenizer(Tokenizer):
     def g2p(self, text: str) -> List[str]:
         try:
             tokens = phonemize_espeak(text, self.lang)
-            tokens = reduce(lambda x, y: x + y, tokens)
+            tokens = reduce(lambda x, y: x + y, tokens)  # flatten
+            if self.lang == 'fa':
+                # strip prosody from each token for farsi
+                tokens = [t.translate(_PROSODY_DEL) for t in tokens]
+            tokens = [t for t in tokens if t]
             return tokens
         except Exception as ex:
             logging.warning(f"Tokenization of {self.lang} texts failed: {ex}")
