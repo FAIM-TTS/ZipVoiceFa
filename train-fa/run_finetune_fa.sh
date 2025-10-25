@@ -104,12 +104,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# join audio dirs with commas so python side can split
 if ((${#AUDIO_DIRS_LIST[@]})); then
   IFS=, read -r AUDIO_DIRS <<<"${AUDIO_DIRS_LIST[*]}"
 fi
 
-# finalize ROOT and make all paths relative to it
 cd "$ROOT"
 export PYTHONPATH="${ROOT}:${PYTHONPATH:-}"
 
@@ -203,7 +201,7 @@ if [[ ${stage} -le 5 && ${stop_stage} -ge 5 ]]; then
   export CUDA_VISIBLE_DEVICES="$(seq -s, 0 $((PROCESSES-1)))"
 
   accelerate launch --multi_gpu --num_processes="${PROCESSES}" --mixed_precision=fp16 \
-    python3 "train-fa/train_zipvoice_fa.py" \
+      "train-fa/train_zipvoice_fa.py" \
       --finetune 1 \
       --seed "${SEED}" \
       --base-lr "${BASE_LR}" \
