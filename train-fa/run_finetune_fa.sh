@@ -203,7 +203,7 @@ if [[ ${stage} -le 5 && ${stop_stage} -ge 5 ]]; then
   export CUDA_VISIBLE_DEVICES="$(seq -s, 0 $((PROCESSES-1)))"
 
   accelerate launch --multi_gpu --num_processes="${PROCESSES}" --mixed_precision=fp16 \
-    -m zipvoice.bin.train_zipvoice_fa \
+    python3 "train-fa/train_zipvoice_fa.py" \
       --finetune 1 \
       --seed "${SEED}" \
       --base-lr "${BASE_LR}" \
